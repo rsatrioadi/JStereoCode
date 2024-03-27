@@ -5,13 +5,14 @@
 
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class VariableInfo {
-    private IVariableBinding variableBinding;
-    private Set<IVariableBinding> assignedFields;
+    private final IVariableBinding variableBinding;
+    private final Set<IVariableBinding> assignedFields;
     private boolean isInstantiated;
     private boolean isReturned;
     private boolean isModified;
@@ -21,7 +22,7 @@ public class VariableInfo {
         this.isInstantiated = false;
         this.isReturned = false;
         this.isModified = false;
-        this.assignedFields = new HashSet();
+        this.assignedFields = new HashSet<>();
     }
 
     public VariableInfo(IVariableBinding name, boolean isInstantiated) {
@@ -29,7 +30,7 @@ public class VariableInfo {
         this.isInstantiated = isInstantiated;
         this.isReturned = false;
         this.isModified = false;
-        this.assignedFields = new HashSet();
+        this.assignedFields = new HashSet<>();
     }
 
     public IVariableBinding getVariableBinding() {
@@ -83,16 +84,10 @@ public class VariableInfo {
         } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            VariableInfo other = (VariableInfo)obj;
+            VariableInfo other = (VariableInfo) obj;
             if (this.variableBinding == null) {
-                if (other.variableBinding != null) {
-                    return false;
-                }
-            } else if (!this.variableBinding.equals(other.variableBinding)) {
-                return false;
-            }
-
-            return true;
+                return other.variableBinding == null;
+            } else return this.variableBinding.equals(other.variableBinding);
         }
     }
 }

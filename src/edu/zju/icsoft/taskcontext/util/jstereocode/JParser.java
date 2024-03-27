@@ -1,77 +1,57 @@
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.dom.*;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jface.text.Document;
 
 public class JParser {
-	private ASTParser parser;
-    private CompilationUnit unit;
-    private List<ASTNode> elements;
+    private final ASTParser parser;
+    private final CompilationUnit unit;
+    private final List<ASTNode> elements;
     private IMember member;
-    public JParser(ICompilationUnit unit){
+
+    public JParser(ICompilationUnit unit) {
         this.parser = ASTParser.newParser(AST.JLS19);
-        parser.setResolveBindings(true);         //打开绑定
+        parser.setResolveBindings(true);         // open binding
         parser.setBindingsRecovery(true);
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);  //K_COMPILATION_UNIT：编译单元，即一个Java文件,是所需解析的代码的类型
-        //最重要的两步
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);  // K_COMPILATION_UNIT: Compilation unit, that is, a Java file, is the type of code that needs to be parsed
+        // The two most important steps
         parser.setEnvironment(null, null, null, true);  //setEnvironment（classPath,sourcePath,encoding,true）
         parser.setSource(unit);
         parser.setUnitName(unit.getElementName());
-        this.unit = (CompilationUnit)parser.createAST((IProgressMonitor)null);
-        this.elements = new ArrayList();
+        this.unit = (CompilationUnit) parser.createAST(null);
+        this.elements = new ArrayList<>();
     }
 
     public JParser(IMember member) {
         this(member.getCompilationUnit());
         this.member = member;
-        
+
     }
 
     public void parse() {
         if (this.member != null) {
-            if (this.member instanceof IType) {
-                this.elements.add(this.unit.findDeclaringNode(((IType)this.member).getKey()));
-            } else if (this.member instanceof IMethod) {
-                parser.setProject(((IMethod)this.member).getJavaProject());
-                IBinding binding = parser.createBindings(new IJavaElement[]{(IMethod)this.member}, (IProgressMonitor)null)[0];
+            if (this.member instanceof IType type) {
+                this.elements.add(this.unit.findDeclaringNode((type).getKey()));
+            } else if (this.member instanceof IMethod method) {
+                parser.setProject(method.getJavaProject());
+                IBinding binding = parser.createBindings(new IJavaElement[]{method}, null)[0];
                 if (binding instanceof IMethodBinding) {
-                    ASTNode method = this.unit.findDeclaringNode(((IMethodBinding)binding).getKey());
-                    this.elements.add(method);
+                    ASTNode declaringNode = this.unit.findDeclaringNode(binding.getKey());
+                    this.elements.add(declaringNode);
                 }
-            }
-            else {
-                parser.setProject(((IField)this.member).getJavaProject());
-                IBinding binding = parser.createBindings(new IJavaElement[]{(IField)this.member}, (IProgressMonitor)null)[0];
+            } else {
+                parser.setProject(this.member.getJavaProject());
+                IBinding binding = parser.createBindings(new IJavaElement[]{this.member}, null)[0];
                 ASTNode field = this.unit.findDeclaringNode(binding.getKey());
                 this.elements.add(field);
             }
         } else {
-            Iterator var5 = this.unit.types().iterator();
-            while(var5.hasNext()) {
-                Object o = var5.next();
-                if (o instanceof TypeDeclaration) {
-                    this.elements.add((TypeDeclaration)o);
+            for (Object o : this.unit.types()) {
+                if (o instanceof TypeDeclaration td) {
+                    this.elements.add(td);
                 }
             }
         }
@@ -85,6 +65,5 @@ public class JParser {
         return this.unit;
     }
 
-    
 
 }

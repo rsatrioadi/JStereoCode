@@ -27,7 +27,7 @@ public enum MethodStereotype implements CodeStereotype {
     private final MethodStereotype.Category category;
     private final MethodStereotype.Subcategory subcategory;
 
-    private MethodStereotype(MethodStereotype.Category category, MethodStereotype.Subcategory subcategory) {
+    MethodStereotype(MethodStereotype.Category category, MethodStereotype.Subcategory subcategory) {
         this.category = category;
         this.subcategory = subcategory;
     }
@@ -40,18 +40,15 @@ public enum MethodStereotype implements CodeStereotype {
         return this.subcategory;
     }
 
-    public static enum Category {
+    public enum Category {
         ACCESSOR,
         MUTATOR,
         CREATIONAL,
         COLLABORATIONAL,
         DEGENERATE;
-
-        private Category() {
-        }
     }
 
-    public static enum Subcategory {
+    public enum Subcategory {
         GET,
         PREDICATE,
         PROPERTY,
@@ -69,9 +66,6 @@ public enum MethodStereotype implements CodeStereotype {
         INCIDENTAL,
         EMPTY,
         ABSTRACT;
-
-        private Subcategory() {
-        }
     }
 }
 

@@ -5,11 +5,12 @@
 
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
-import java.util.Comparator;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import java.util.Comparator;
+
 public class TypeInfo {
-    private ITypeBinding typeBinding;
+    private final ITypeBinding typeBinding;
     private int frequency;
 
     public TypeInfo(ITypeBinding type) {
@@ -34,9 +35,8 @@ public class TypeInfo {
     }
 
     public int hashCode() {
-        boolean prime = true;
         int result = 1;
-        result = 31 * result + (this.typeBinding == null ? 0 : this.typeBinding.hashCode());
+        result = (31 * result) + ((this.typeBinding == null) ? 0 : this.typeBinding.hashCode());
         return result;
     }
 
@@ -48,16 +48,10 @@ public class TypeInfo {
         } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            TypeInfo other = (TypeInfo)obj;
+            TypeInfo other = (TypeInfo) obj;
             if (this.typeBinding == null) {
-                if (other.typeBinding != null) {
-                    return false;
-                }
-            } else if (!this.typeBinding.equals(other.typeBinding)) {
-                return false;
-            }
-
-            return true;
+                return other.typeBinding == null;
+            } else return this.typeBinding.equals(other.typeBinding);
         }
     }
 

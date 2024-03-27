@@ -6,12 +6,9 @@
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
 
-import java.util.Iterator;
-
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
-
 
 
 public class MethodStereotypeRules {
@@ -30,10 +27,13 @@ public class MethodStereotypeRules {
 
     protected MethodStereotype checkForMutatorStereotype() {
         if (!this.methodAnalyzer.getSetFields().isEmpty()) {
-            if (!this.isVoid(this.methodAnalyzer.getReturnType()) && !this.isBoolean(this.methodAnalyzer.getReturnType())) {
+            if (!this.isVoid(this.methodAnalyzer.getReturnType())
+                    && !this.isBoolean(this.methodAnalyzer.getReturnType())) {
                 return MethodStereotype.NON_VOID_COMMAND;
             } else {
-                return this.methodAnalyzer.getSetFields().size() == 1 ? MethodStereotype.SET : MethodStereotype.COMMAND;
+                return (this.methodAnalyzer.getSetFields().size() == 1)
+                        ? MethodStereotype.SET
+                        : MethodStereotype.COMMAND;
             }
         } else {
             return null;
@@ -43,7 +43,8 @@ public class MethodStereotypeRules {
     protected MethodStereotype checkForAccessorStereotype() {
         if (this.methodAnalyzer.getSetFields().isEmpty()) {
             if (!this.isVoid(this.methodAnalyzer.getReturnType())) {
-                if (!this.methodAnalyzer.getGetFields().isEmpty() && this.methodAnalyzer.getPropertyFields().isEmpty()) {
+                if (!this.methodAnalyzer.getGetFields().isEmpty()
+                        && this.methodAnalyzer.getPropertyFields().isEmpty()) {
                     return MethodStereotype.GET;
                 }
 
@@ -79,56 +80,62 @@ public class MethodStereotypeRules {
         boolean allPrimitiveVariables = true;
         int returnedFieldVariables = 0;
         int modifiedObjectParameters = 0;
-        Iterator var7 = this.methodAnalyzer.getParameters().iterator();
 
-        VariableInfo variable;
-        while(var7.hasNext()) {
-            variable = (VariableInfo)var7.next();
-            if (!this.isPrimitive(variable.getVariableBinding())) {
+        for (VariableInfo variableInfo : this.methodAnalyzer.getParameters()) {
+            if (!this.isPrimitive(variableInfo.getVariableBinding())) {
                 allPrimitiveParameters = false;
             }
 
-            if (variable.isReturned() && !variable.getAssignedFields().isEmpty()) {
+            if (variableInfo.isReturned() && !variableInfo.getAssignedFields().isEmpty()) {
                 ++returnedFieldVariables;
             }
 
-            if (variable.isModified() && !this.isPrimitive(variable.getVariableBinding())) {
+            if (variableInfo.isModified() && !this.isPrimitive(variableInfo.getVariableBinding())) {
                 ++modifiedObjectParameters;
             }
         }
 
-        var7 = this.methodAnalyzer.getVariables().iterator();
-
-        while(var7.hasNext()) {
-            variable = (VariableInfo)var7.next();
-            if (!this.isPrimitive(variable.getVariableBinding())) {
+        for (VariableInfo variableInfo : this.methodAnalyzer.getVariables()) {
+            if (!this.isPrimitive(variableInfo.getVariableBinding())) {
                 allPrimitiveVariables = false;
             }
 
-            if (variable.isReturned() && !variable.getAssignedFields().isEmpty()) {
+            if (variableInfo.isReturned() && !variableInfo.getAssignedFields().isEmpty()) {
                 ++returnedFieldVariables;
             }
         }
 
         if (!asPrimaryStereotype) {
-            if ((!this.methodAnalyzer.getParameters().isEmpty() && modifiedObjectParameters > 0 || !this.methodAnalyzer.getVariables().isEmpty() && !allPrimitiveVariables) && this.methodAnalyzer.getParameters().size() + this.methodAnalyzer.getVariables().size() > returnedFieldVariables) {
+            if (((!this.methodAnalyzer.getParameters().isEmpty()
+                    && (modifiedObjectParameters > 0))
+                    || (!this.methodAnalyzer.getVariables().isEmpty() && !allPrimitiveVariables))
+                    && ((this.methodAnalyzer.getParameters().size() + this.methodAnalyzer.getVariables().size()) > returnedFieldVariables)) {
                 return MethodStereotype.COLLABORATOR;
             }
-        } else if (!this.methodAnalyzer.getParameters().isEmpty() && !allPrimitiveParameters || !this.methodAnalyzer.getVariables().isEmpty() && !allPrimitiveVariables) {
+        } else if ((!this.methodAnalyzer.getParameters().isEmpty() && !allPrimitiveParameters)
+                || (!this.methodAnalyzer.getVariables().isEmpty() && !allPrimitiveVariables)) {
             return MethodStereotype.COLLABORATOR;
         }
 
-        if (!this.methodAnalyzer.getInvokedLocalMethods().isEmpty() && !this.methodAnalyzer.getInvokedExternalMethods().isEmpty()) {
+        if (!this.methodAnalyzer.getInvokedLocalMethods().isEmpty()
+                && !this.methodAnalyzer.getInvokedExternalMethods().isEmpty()) {
             return MethodStereotype.COLLABORATOR;
-        } else if (!this.methodAnalyzer.getInvokedExternalMethods().isEmpty() && this.methodAnalyzer.usesFields()) {
+        } else if (!this.methodAnalyzer.getInvokedExternalMethods().isEmpty()
+                && this.methodAnalyzer.usesFields()) {
             return MethodStereotype.COLLABORATOR;
         } else {
             if (allPrimitiveParameters && allPrimitiveVariables) {
-                if (!this.methodAnalyzer.getInvokedLocalMethods().isEmpty() && this.methodAnalyzer.getInvokedExternalMethods().isEmpty()) {
+                if (!this.methodAnalyzer.getInvokedLocalMethods().isEmpty()
+                        && this.methodAnalyzer.getInvokedExternalMethods().isEmpty()) {
                     return MethodStereotype.LOCAL_CONTROLLER;
                 }
 
-                if (!this.methodAnalyzer.getInvokedExternalMethods().isEmpty() && this.methodAnalyzer.getInvokedLocalMethods().isEmpty() && !this.methodAnalyzer.usesFields() && this.methodAnalyzer.getGetFields().isEmpty() && this.methodAnalyzer.getPropertyFields().isEmpty() && this.methodAnalyzer.getSetFields().isEmpty()) {
+                if (!this.methodAnalyzer.getInvokedExternalMethods().isEmpty()
+                        && this.methodAnalyzer.getInvokedLocalMethods().isEmpty()
+                        && !this.methodAnalyzer.usesFields()
+                        && this.methodAnalyzer.getGetFields().isEmpty()
+                        && this.methodAnalyzer.getPropertyFields().isEmpty()
+                        && this.methodAnalyzer.getSetFields().isEmpty()) {
                     return MethodStereotype.CONTROLLER;
                 }
             }
@@ -139,10 +146,8 @@ public class MethodStereotypeRules {
 
     private boolean isVoid(Type type) {
         if (type.isPrimitiveType()) {
-            PrimitiveType primitive = (PrimitiveType)type;
-            if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
-                return true;
-            }
+            PrimitiveType primitive = (PrimitiveType) type;
+            return primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID);
         }
 
         return false;
@@ -150,10 +155,8 @@ public class MethodStereotypeRules {
 
     private boolean isBoolean(Type type) {
         if (type.isPrimitiveType()) {
-            PrimitiveType primitive = (PrimitiveType)type;
-            if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.BOOLEAN)) {
-                return true;
-            }
+            PrimitiveType primitive = (PrimitiveType) type;
+            return primitive.getPrimitiveTypeCode().equals(PrimitiveType.BOOLEAN);
         }
 
         return false;

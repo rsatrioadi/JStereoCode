@@ -20,7 +20,4 @@ public enum TypeStereotype implements CodeStereotype {
     DATA_CLASS,
     POOL,
     INTERFACE;
-
-    private TypeStereotype() {
-    }
 }

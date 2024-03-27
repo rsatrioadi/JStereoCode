@@ -1,17 +1,16 @@
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import edu.zju.icsoft.taskcontext.util.jstereocode.MethodStereotype.Category;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
-import edu.zju.icsoft.taskcontext.util.jstereocode.MethodStereotype.Category;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class StereotypedMethod extends MethodStereotypeRules implements StereotypedElement {
-    private MethodDeclaration method;
+    private final MethodDeclaration method;
     private MethodStereotype primaryStereotype;
     private MethodStereotype secondaryStereotype;
 //    private static Pattern METHOD_KEY_PATTERN = Pattern.compile("([A-Z])(([a-zA-Z_][a-zA-Z0-9_]+/)*)([a-zA-Z_][a-zA-Z0-9_]*)(~([a-zA-Z0-9_]+))?((\\$[a-zA-Z_][a-zA-Z0-9_]+)*)(\\$[0-9]+)?;\\.([a-zA-Z_][a-zA-Z0-9_]*)?(\\<.*\\>)?(\\(.*\\).*)");
@@ -22,7 +21,7 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
     }
 
     public List<CodeStereotype> getStereotypes() {
-        ArrayList<CodeStereotype> stereotypes = new ArrayList();
+        ArrayList<CodeStereotype> stereotypes = new ArrayList<>();
         if (this.primaryStereotype != null) {
             stereotypes.add(this.primaryStereotype);
         }
@@ -33,18 +32,18 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
 
         return stereotypes;
     }
-    
+
     public String getStereotypesName() {
-    	if(this.secondaryStereotype != null) {
-    		return this.primaryStereotype.toString()+"-"+this.secondaryStereotype.toString();
-    	}
-    	if(this.primaryStereotype != null)
-		return primaryStereotype.toString();
-    	else return "NULL";
-	}
+        if (this.secondaryStereotype != null) {
+            return "%s-%s".formatted(this.primaryStereotype.toString(), this.secondaryStereotype.toString());
+        }
+        if (this.primaryStereotype != null)
+            return primaryStereotype.toString();
+        else return "NULL";
+    }
 
     public List<StereotypedElement> getStereoSubElements() {
-        return new ArrayList();
+        return new ArrayList<>();
     }
 
     public MethodDeclaration getElement() {
@@ -81,8 +80,6 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
             this.primaryStereotype = this.findPrimaryStereotype();
             if (!this.primaryStereotype.getCategory().equals(Category.COLLABORATIONAL) && !this.primaryStereotype.getCategory().equals(Category.DEGENERATE)) {
                 this.secondaryStereotype = this.findSecondaryStereotype();
-                if (this.secondaryStereotype != null) {
-                }
             }
         } catch (NullPointerException var2) {
             this.primaryStereotype = MethodStereotype.INCIDENTAL;
@@ -212,7 +209,7 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
         }
 
         if (this.secondaryStereotype != null) {
-            result = result || this.secondaryStereotype.getCategory().equals(stereotypeCategory);
+            result |= this.secondaryStereotype.getCategory().equals(stereotypeCategory);
         }
 
         return result;
@@ -239,10 +236,9 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
     }
 
     public int hashCode() {
-        boolean prime = true;
         int result = 1;
-        result = 31 * result + (this.primaryStereotype == null ? 0 : this.primaryStereotype.hashCode());
-        result = 31 * result + (this.secondaryStereotype == null ? 0 : this.secondaryStereotype.hashCode());
+        result = (31 * result) + ((this.primaryStereotype == null) ? 0 : this.primaryStereotype.hashCode());
+        result = (31 * result) + ((this.secondaryStereotype == null) ? 0 : this.secondaryStereotype.hashCode());
         return result;
     }
 
@@ -254,7 +250,7 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
         } else if (this.getClass() != obj.getClass()) {
             return false;
         } else {
-            StereotypedMethod other = (StereotypedMethod)obj;
+            StereotypedMethod other = (StereotypedMethod) obj;
             if (this.method == null) {
                 if (other.method != null) {
                     return false;
@@ -270,29 +266,31 @@ public class StereotypedMethod extends MethodStereotypeRules implements Stereoty
             }
         }
     }
-    
+
     public String getQualifiedName() {
-    	if (this.method == null) {
-    		return "";
-    	}
-    	String className = this.method.resolveBinding().getDeclaringClass().getQualifiedName();
-    	ITypeBinding[] params = this.method.resolveBinding().getParameterTypes();
-    	ArrayList<String> paramsType = new ArrayList<String>();
-    	for (int i=0; i<params.length; i++) {
-    		paramsType.add(params[i].getName());
-    	}
-    	String ps = String.join(",", paramsType);
-    	return className + "." + this.method.getName() + "(" + ps + ")";
+        if (this.method == null) {
+            return "";
+        }
+        String className = this.method.resolveBinding().getDeclaringClass().getQualifiedName();
+        ITypeBinding[] params = this.method.resolveBinding().getParameterTypes();
+        ArrayList<String> paramsType = new ArrayList<>();
+        for (ITypeBinding param : params) {
+            paramsType.add(param.getName());
+        }
+        String ps = String.join(",", paramsType);
+        return "%s.%s(%s)".formatted(className, this.method.getName(), ps);
     }
 
     public String getName() {
-        return this.method != null && this.method.resolveBinding() != null ? this.method.resolveBinding().getName() : "";
+        return ((this.method != null) && (this.method.resolveBinding() != null))
+                ? this.method.resolveBinding().getName()
+                : "";
     }
 
-	@Override
-	public List<StereotypedElement> getStereoSubFields() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<StereotypedElement> getStereoSubFields() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

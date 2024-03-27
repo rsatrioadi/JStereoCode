@@ -1,8 +1,8 @@
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
+
+import java.util.List;
 
 public interface StereotypedElement {
     ASTNode getElement();
@@ -10,11 +10,11 @@ public interface StereotypedElement {
     List<CodeStereotype> getStereotypes();
 
     List<StereotypedElement> getStereoSubElements();
-    
+
     List<StereotypedElement> getStereoSubFields();
 
     String getStereotypesName();
-    
+
     void findStereotypes();
 
     String getName();

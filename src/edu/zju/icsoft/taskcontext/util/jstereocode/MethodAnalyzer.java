@@ -597,7 +597,6 @@
 //}
 
 
-
 //
 // Source code recreated from a .class file by IntelliJ IDEA
 // (powered by FernFlower decompiler)
@@ -605,32 +604,10 @@
 
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
+import org.eclipse.jdt.core.dom.*;
+
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import java.util.*;
 
 public class MethodAnalyzer {
     private boolean isConstructor = false;
@@ -645,16 +622,16 @@ public class MethodAnalyzer {
     private boolean overridesEquals = false;
     private Type returnType;
     private ITypeBinding declaringClass;
-    private Set<IVariableBinding> getFields = new HashSet();
-    private Set<IVariableBinding> propertyFields = new HashSet();
-    private Set<IVariableBinding> voidAccessorFields = new HashSet();
-    private Set<IVariableBinding> setFields = new HashSet();
-    private List<VariableInfo> parameters = new LinkedList();
-    private List<VariableInfo> variables = new LinkedList();
+    private final Set<IVariableBinding> getFields = new HashSet<>();
+    private final Set<IVariableBinding> propertyFields = new HashSet<>();
+    private final Set<IVariableBinding> voidAccessorFields = new HashSet<>();
+    private final Set<IVariableBinding> setFields = new HashSet<>();
+    private final List<VariableInfo> parameters = new LinkedList<>();
+    private final List<VariableInfo> variables = new LinkedList<>();
     private boolean instantiatedReturn = false;
-    private Set<IMethodBinding> invokedLocalMethods = new HashSet();
-    private Set<IMethodBinding> invokedExternalMethods = new HashSet();
-    private List<TypeInfo> usedTypes = new LinkedList();
+    private final Set<IMethodBinding> invokedLocalMethods = new HashSet<>();
+    private final Set<IMethodBinding> invokedExternalMethods = new HashSet<>();
+    private final List<TypeInfo> usedTypes = new LinkedList<>();
 
     public MethodAnalyzer(MethodDeclaration method) {
         method.accept(new MethodAnalyzer.MethodVisitor(method));
@@ -785,11 +762,9 @@ public class MethodAnalyzer {
             MethodAnalyzer.this.overridesToString = node.resolveBinding().getKey().contains(";.toString()Ljava/lang/String;");
             MethodAnalyzer.this.overridesEquals = node.resolveBinding().getKey().contains(";.equals(Ljava/lang/Object;)Z");
             MethodAnalyzer.this.overridesHashCode = node.resolveBinding().getKey().contains(";.hashCode()I");
-            Iterator var4 = node.parameters().iterator();
 
-            while(var4.hasNext()) {
-                Object o = var4.next();
-                SingleVariableDeclaration parameter = (SingleVariableDeclaration)o;
+            for (Object o : node.parameters()) {
+                SingleVariableDeclaration parameter = (SingleVariableDeclaration) o;
                 MethodAnalyzer.this.parameters.add(new VariableInfo(parameter.resolveBinding()));
             }
 
@@ -829,34 +804,21 @@ public class MethodAnalyzer {
                 MethodAnalyzer.this.getFields.add(field);
             } else {
                 int index = this.getVariableIndex(node.getExpression());
-                if (index != -1 && ((VariableInfo)MethodAnalyzer.this.variables.get(index)).isInstantiated() && !MethodAnalyzer.this.returnType.isPrimitiveType()) {
+                if (index != -1 && MethodAnalyzer.this.variables.get(index).isInstantiated() && !MethodAnalyzer.this.returnType.isPrimitiveType()) {
                     MethodAnalyzer.this.instantiatedReturn = true;
-                    ((VariableInfo)MethodAnalyzer.this.variables.get(index)).setReturned(true);
+                    MethodAnalyzer.this.variables.get(index).setReturned(true);
                 } else {
-                    IVariableBinding var;
-                    Iterator var5;
                     if (index != -1) {
-                        if (!((VariableInfo)MethodAnalyzer.this.variables.get(index)).getAssignedFields().isEmpty()) {
-                            var5 = ((VariableInfo)MethodAnalyzer.this.variables.get(index)).getAssignedFields().iterator();
-
-                            while(var5.hasNext()) {
-                                var = (IVariableBinding)var5.next();
-                                MethodAnalyzer.this.propertyFields.add(var);
-                            }
+                        if (!MethodAnalyzer.this.variables.get(index).getAssignedFields().isEmpty()) {
+                            MethodAnalyzer.this.propertyFields.addAll(MethodAnalyzer.this.variables.get(index).getAssignedFields());
                         }
 
-                        ((VariableInfo)MethodAnalyzer.this.variables.get(index)).setReturned(true);
+                        MethodAnalyzer.this.variables.get(index).setReturned(true);
                     } else {
                         index = this.getParameterIndex(node.getExpression());
                         if (index != -1) {
-                            var5 = ((VariableInfo)MethodAnalyzer.this.parameters.get(index)).getAssignedFields().iterator();
-
-                            while(var5.hasNext()) {
-                                var = (IVariableBinding)var5.next();
-                                MethodAnalyzer.this.propertyFields.add(var);
-                            }
-
-                            ((VariableInfo)MethodAnalyzer.this.parameters.get(index)).setReturned(true);
+                            MethodAnalyzer.this.propertyFields.addAll(MethodAnalyzer.this.parameters.get(index).getAssignedFields());
+                            MethodAnalyzer.this.parameters.get(index).setReturned(true);
                         }
                     }
                 }
@@ -878,12 +840,12 @@ public class MethodAnalyzer {
 
             this.assignedVariableIndex = this.getVariableIndex(node.getLeftHandSide());
             if (this.assignedVariableIndex != -1) {
-                ((VariableInfo)MethodAnalyzer.this.variables.get(this.assignedVariableIndex)).setModified(true);
+                MethodAnalyzer.this.variables.get(this.assignedVariableIndex).setModified(true);
             }
 
             this.assignedParameterIndex = this.getParameterIndex(node.getLeftHandSide());
             if (this.assignedParameterIndex != -1) {
-                ((VariableInfo)MethodAnalyzer.this.parameters.get(this.assignedParameterIndex)).setModified(true);
+                MethodAnalyzer.this.parameters.get(this.assignedParameterIndex).setModified(true);
             }
 
             node.getLeftHandSide().accept(this);
@@ -911,8 +873,7 @@ public class MethodAnalyzer {
                 MethodAnalyzer.this.invokedLocalMethods.add(node.resolveMethodBinding());
             }
 
-            if (node.getExpression() instanceof SimpleName) {
-                SimpleName name = (SimpleName)node.getExpression();
+            if (node.getExpression() instanceof SimpleName name) {
                 if (name.resolveBinding() instanceof ITypeBinding) {
                     MethodAnalyzer.this.invokedExternalMethods.add(node.resolveMethodBinding());
                 }
@@ -924,11 +885,9 @@ public class MethodAnalyzer {
 
             node.getName().accept(this);
             ++this.inMethodArguments;
-            Iterator var3 = node.arguments().iterator();
 
-            while(var3.hasNext()) {
-                Object o = var3.next();
-                ((Expression)o).accept(this);
+            for (Object o : node.arguments()) {
+                ((Expression) o).accept(this);
             }
 
             --this.inMethodArguments;
@@ -936,11 +895,12 @@ public class MethodAnalyzer {
         }
 
         public boolean visit(ExpressionStatement node) {
-            if (node.getExpression() instanceof MethodInvocation) {
-                MethodInvocation method = (MethodInvocation)node.getExpression();
+            if (node.getExpression() instanceof MethodInvocation method) {
 
                 Expression expression;
-                for(expression = method.getExpression(); expression instanceof MethodInvocation; expression = ((MethodInvocation)expression).getExpression()) {
+                expression = method.getExpression();
+                while (expression instanceof MethodInvocation) {
+                    expression = ((MethodInvocation) expression).getExpression();
                 }
 
                 IVariableBinding field = this.getLocalField(expression);
@@ -950,11 +910,11 @@ public class MethodAnalyzer {
 
                 int index = this.getVariableIndex(method.getExpression());
                 if (index != -1) {
-                    ((VariableInfo)MethodAnalyzer.this.variables.get(index)).setModified(true);
+                    MethodAnalyzer.this.variables.get(index).setModified(true);
                 } else {
                     index = this.getParameterIndex(method.getExpression());
                     if (index != -1) {
-                        ((VariableInfo)MethodAnalyzer.this.parameters.get(index)).setModified(true);
+                        MethodAnalyzer.this.parameters.get(index).setModified(true);
                     }
                 }
 
@@ -971,26 +931,25 @@ public class MethodAnalyzer {
             MethodAnalyzer.this.checkNonFinalStaticFieldUse(field);
             if (field != null) {
                 if (this.inAssignmentRightSide > 0 && this.assignedVariableIndex != -1) {
-                    ((VariableInfo)MethodAnalyzer.this.variables.get(this.assignedVariableIndex)).addAssignedField(field);
+                    MethodAnalyzer.this.variables.get(this.assignedVariableIndex).addAssignedField(field);
                     return super.visit(node);
                 }
 
-                if (this.inAssignmentRightSide > 0 && this.assignedParameterIndex != -1 && !((VariableInfo)MethodAnalyzer.this.parameters.get(this.assignedParameterIndex)).getVariableBinding().getType().isPrimitive()) {
-                    ((VariableInfo)MethodAnalyzer.this.parameters.get(this.assignedParameterIndex)).addAssignedField(field);
+                if (this.inAssignmentRightSide > 0 && this.assignedParameterIndex != -1 && !MethodAnalyzer.this.parameters.get(this.assignedParameterIndex).getVariableBinding().getType().isPrimitive()) {
+                    MethodAnalyzer.this.parameters.get(this.assignedParameterIndex).addAssignedField(field);
                     MethodAnalyzer.this.voidAccessorFields.add(field);
                     super.visit(node);
                 }
 
                 if (this.inReturn > 0 && !(node.getParent() instanceof ReturnStatement) && this.inMethodArguments == 0) {
-                    MethodAnalyzer.this.propertyFields.add((IVariableBinding)node.resolveBinding());
+                    MethodAnalyzer.this.propertyFields.add((IVariableBinding) node.resolveBinding());
                     return super.visit(node);
                 }
             }
 
-            if (node.resolveBinding() instanceof ITypeBinding) {
-                ITypeBinding typeBinding = (ITypeBinding)node.resolveBinding();
-                if (!typeBinding.isPrimitive() && !typeBinding.isParameterizedType()) {
-                    this.addUsedType(typeBinding);
+            if (node.resolveBinding() instanceof ITypeBinding binding) {
+                if (!binding.isPrimitive() && !binding.isParameterizedType()) {
+                    this.addUsedType(binding);
                 }
             }
 
@@ -1000,7 +959,7 @@ public class MethodAnalyzer {
         private void addUsedType(ITypeBinding typeBinding) {
             TypeInfo type = new TypeInfo(typeBinding);
             if (MethodAnalyzer.this.usedTypes.contains(type)) {
-                ((TypeInfo)MethodAnalyzer.this.usedTypes.get(MethodAnalyzer.this.usedTypes.indexOf(type))).incrementFrequency();
+                MethodAnalyzer.this.usedTypes.get(MethodAnalyzer.this.usedTypes.indexOf(type)).incrementFrequency();
             } else {
                 MethodAnalyzer.this.usedTypes.add(type);
             }
@@ -1029,14 +988,13 @@ public class MethodAnalyzer {
 
         private IVariableBinding getLocalField(Expression expression) {
             IVariableBinding variableBinding = null;
-            if (expression instanceof FieldAccess) {
-                variableBinding = ((FieldAccess)expression).resolveFieldBinding();
+            if (expression instanceof FieldAccess fieldAccess) {
+                variableBinding = fieldAccess.resolveFieldBinding();
             }
 
-            if (expression instanceof SimpleName) {
-                SimpleName simpleName = (SimpleName)expression;
+            if (expression instanceof SimpleName simpleName) {
                 if (simpleName.resolveBinding() instanceof IVariableBinding) {
-                    variableBinding = (IVariableBinding)simpleName.resolveBinding();
+                    variableBinding = (IVariableBinding) simpleName.resolveBinding();
                 }
             }
 
@@ -1044,15 +1002,12 @@ public class MethodAnalyzer {
                 return variableBinding;
             } else {
                 IVariableBinding nameBinding;
-                if (expression instanceof SuperFieldAccess) {
-                    SuperFieldAccess superFieldAccess = (SuperFieldAccess)expression;
+                if (expression instanceof SuperFieldAccess superFieldAccess) {
                     nameBinding = this.getLocalField(superFieldAccess.getName());
                     return nameBinding != null ? nameBinding : this.getLocalField(superFieldAccess.getQualifier());
-                } else if (expression instanceof ArrayAccess) {
-                    ArrayAccess arrayAccess = (ArrayAccess)expression;
+                } else if (expression instanceof ArrayAccess arrayAccess) {
                     return this.getLocalField(arrayAccess.getArray());
-                } else if (expression instanceof QualifiedName) {
-                    QualifiedName qualifiedName = (QualifiedName)expression;
+                } else if (expression instanceof QualifiedName qualifiedName) {
                     nameBinding = this.getLocalField(qualifiedName.getName());
                     return nameBinding != null ? nameBinding : this.getLocalField(qualifiedName.getQualifier());
                 } else {
@@ -1075,33 +1030,25 @@ public class MethodAnalyzer {
                     return true;
                 }
 
-                ITypeBinding[] var6;
-                int var5 = (var6 = relatedType.getInterfaces()).length;
+                ITypeBinding[] var6 = relatedType.getInterfaces();
 
-                for(int var4 = 0; var4 < var5; ++var4) {
-                    ITypeBinding interfaceType = var6[var4];
-                    if (this.isLocalField(field, interfaceType)) {
-                        return true;
-                    }
-                }
+                return Arrays.stream(var6).anyMatch(interfaceType -> this.isLocalField(field, interfaceType));
             }
 
             return false;
         }
 
         private int getVariableIndex(Expression expression) {
-            if (expression instanceof SimpleName) {
-                SimpleName simpleName = (SimpleName)expression;
+            if (expression instanceof SimpleName simpleName) {
                 if (simpleName.resolveBinding() instanceof IVariableBinding) {
-                    VariableInfo var = new VariableInfo((IVariableBinding)simpleName.resolveBinding());
+                    VariableInfo var = new VariableInfo((IVariableBinding) simpleName.resolveBinding());
                     if (MethodAnalyzer.this.variables.contains(var)) {
                         return MethodAnalyzer.this.variables.indexOf(var);
                     }
                 }
             }
 
-            if (expression instanceof QualifiedName) {
-                QualifiedName qualifiedName = (QualifiedName)expression;
+            if (expression instanceof QualifiedName qualifiedName) {
                 int index = this.getVariableIndex(qualifiedName.getName());
                 return index != -1 ? index : this.getVariableIndex(qualifiedName.getQualifier());
             } else {
@@ -1110,18 +1057,16 @@ public class MethodAnalyzer {
         }
 
         private int getParameterIndex(Expression expression) {
-            if (expression instanceof SimpleName) {
-                SimpleName simpleName = (SimpleName)expression;
-                if (simpleName.resolveBinding() instanceof IVariableBinding) {
-                    VariableInfo var = new VariableInfo((IVariableBinding)simpleName.resolveBinding());
+            if (expression instanceof SimpleName simpleName) {
+                if (simpleName.resolveBinding() instanceof IVariableBinding binding) {
+                    VariableInfo var = new VariableInfo(binding);
                     if (MethodAnalyzer.this.parameters.contains(var)) {
                         return MethodAnalyzer.this.parameters.indexOf(var);
                     }
                 }
             }
 
-            if (expression instanceof QualifiedName) {
-                QualifiedName qualifiedName = (QualifiedName)expression;
+            if (expression instanceof QualifiedName qualifiedName) {
                 int index = this.getParameterIndex(qualifiedName.getName());
                 return index != -1 ? index : this.getParameterIndex(qualifiedName.getQualifier());
             } else {
@@ -1138,7 +1083,7 @@ public class MethodAnalyzer {
 
                 ITypeBinding relatedClass = MethodAnalyzer.this.declaringClass;
 
-                while(relatedClass.isNested() && !Modifier.isStatic(relatedClass.getModifiers())) {
+                while (relatedClass.isNested() && !Modifier.isStatic(relatedClass.getModifiers())) {
                     relatedClass = relatedClass.getDeclaringClass();
                     if (relatedClass == null) {
                         break;
@@ -1149,10 +1094,12 @@ public class MethodAnalyzer {
                     }
                 }
 
-                for(relatedClass = MethodAnalyzer.this.declaringClass.getSuperclass(); relatedClass != null; relatedClass = relatedClass.getSuperclass()) {
+                relatedClass = MethodAnalyzer.this.declaringClass.getSuperclass();
+                while (relatedClass != null) {
                     if (methodBinding.getDeclaringClass().equals(relatedClass)) {
                         return true;
                     }
+                    relatedClass = relatedClass.getSuperclass();
                 }
             }
 

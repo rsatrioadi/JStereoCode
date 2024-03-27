@@ -5,15 +5,15 @@
 
 package edu.zju.icsoft.taskcontext.util.jstereocode;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class TypeAnalyzer {
-    private List<StereotypedMethod> stereotypedMethods = new LinkedList();
+    private final List<StereotypedMethod> stereotypedMethods = new LinkedList<>();
 
     public TypeAnalyzer(TypeDeclaration type) {
         TypeAnalyzer.TypeVisitor visitor = new TypeAnalyzer.TypeVisitor();
@@ -24,7 +24,7 @@ public class TypeAnalyzer {
         return this.stereotypedMethods;
     }
 
-    
+
     private class TypeVisitor extends ASTVisitor {
         private boolean isRoot;
 
